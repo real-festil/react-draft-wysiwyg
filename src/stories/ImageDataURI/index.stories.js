@@ -25,6 +25,7 @@ const ImageDataURIComponent = () => (
         image: {
           uploadCallback: uploadImageCallBack,
           previewImage: true,
+          instaUpload: true,
         },
       }}
     />

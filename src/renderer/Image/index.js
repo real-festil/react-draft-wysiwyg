@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EditorState } from 'draft-js';
 import classNames from 'classnames';
+import { Rnd } from 'react-rnd';
 import Option from '../../components/Option';
 import './styles.css';
 
@@ -11,8 +12,12 @@ const getImageComponent = config => class Image extends Component {
     contentState: PropTypes.object,
   };
 
+
   state: Object = {
     hovered: false,
+    height: null,
+    width: null,
+    imageKey: false,
   };
 
   setEntityAlignmentLeft: Function = (): void => {
@@ -45,6 +50,27 @@ const getImageComponent = config => class Image extends Component {
     this.setState({
       hovered,
     });
+  };
+
+  handleResize = (e, direction, ref, delta, position) => {
+    const { block, contentState } = this.props;
+    const entityKey = block.getEntityAt(0);
+    const width = ref.style.width;
+    const height = ref.style.height;
+
+    contentState.mergeEntityData(
+      entityKey,
+      { width, height },
+    );
+    config.onChange(EditorState.push(config.getEditorState(), contentState, 'change-block-data'));
+    this.setState({
+      width,
+      height,
+    });
+
+    this.setState({
+      imageKey: !this.state.imageKey
+    })
   };
 
   renderAlignmentOptions(alignment): Object {
@@ -81,13 +107,18 @@ const getImageComponent = config => class Image extends Component {
 
   render(): Object {
     const { block, contentState } = this.props;
-    const { hovered } = this.state;
+    const { hovered, width, height } = this.state;
     const { isReadOnly, isImageAlignmentEnabled } = config;
     const entity = contentState.getEntity(block.getEntityAt(0));
-    const { src, alignment, height, width, alt } = entity.getData();
+
+    const { src, alignment, alt } = entity.getData();
+
+    const currentWidth = width || entity.getData().width || '100%';
+    const currentHeight = height || entity.getData().height || '100%';
 
     return (
       <span
+        key={this.state.imageKey}
         onMouseEnter={this.toggleHovered}
         onMouseLeave={this.toggleHovered}
         className={classNames(
@@ -98,16 +129,37 @@ const getImageComponent = config => class Image extends Component {
             'rdw-image-center': !alignment || alignment === 'none',
           },
         )}
+        style={{
+          width: currentWidth,
+          height: currentHeight,
+        }}
       >
         <span className="rdw-image-imagewrapper">
-          <img
-            src={src}
-            alt={alt}
-            style={{
-              height,
-              width,
+          <Rnd
+            size={{ width: currentWidth, height: currentHeight }}
+            onResizeStop={this.handleResize}
+            lockAspectRatio={true}
+            enableResizing={{
+              top: true,
+              right: true,
+              bottom: true,
+              left: true,
+              topRight: true,
+              bottomRight: true,
+              bottomLeft: true,
+              topLeft: true,
             }}
-          />
+            disableDragging
+          >
+            <img
+              src={src}
+              alt={alt}
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
+            />
+          </Rnd>
           {
             !isReadOnly() && hovered && isImageAlignmentEnabled() ?
               this.renderAlignmentOptions(alignment)

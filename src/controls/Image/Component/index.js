@@ -7,6 +7,12 @@ import Spinner from '../../../components/Spinner';
 import './styles.css';
 
 class LayoutComponent extends Component {
+  constructor(props) {
+    super(props);
+
+    this.fileInputRef = React.createRef();
+  }
+
   static propTypes = {
     expanded: PropTypes.bool,
     onExpandEvent: PropTypes.func,
@@ -14,6 +20,7 @@ class LayoutComponent extends Component {
     onChange: PropTypes.func,
     config: PropTypes.object,
     translations: PropTypes.object,
+    instaUpload: PropTypes.bool,
   };
 
   state = {
@@ -25,6 +32,7 @@ class LayoutComponent extends Component {
     height: this.props.config.defaultSize.height,
     width: this.props.config.defaultSize.width,
     alt: '',
+    isClicked: false,
   };
 
   componentDidUpdate(prevProps) {
@@ -46,6 +54,13 @@ class LayoutComponent extends Component {
       this.setState({
         uploadHighlighted: config.uploadEnabled && !!config.uploadCallback,
       });
+    }
+
+    if (this.fileInputRef.current && !this.state.isClicked) {
+      this.fileInputRef.current.click();
+      this.setState({
+        isClicked: true
+      })
     }
   }
 
@@ -125,6 +140,21 @@ class LayoutComponent extends Component {
 
   selectImage = event => {
     if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          this.setState({
+            height: img.height,
+            width: img.width,
+          });
+        };
+        img.src = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
       this.uploadImage(event.target.files[0]);
     }
   };
@@ -138,6 +168,8 @@ class LayoutComponent extends Component {
           showImageLoading: false,
           dragEnter: false,
           imgSrc: data.link || data.url,
+        }, () => {
+          this.addImageFromState()
         });
         this.fileUpload = false;
       })
@@ -163,6 +195,7 @@ class LayoutComponent extends Component {
     }
   };
 
+
   renderAddImageModal() {
     const {
       imgSrc,
@@ -186,6 +219,7 @@ class LayoutComponent extends Component {
       doCollapse,
       translations,
     } = this.props;
+
     return (
       <div
         className={classNames('rdw-image-modal', popupClassName)}
@@ -250,6 +284,7 @@ class LayoutComponent extends Component {
               id="file"
               accept={inputAccept}
               onChange={this.selectImage}
+              ref={this.fileInputRef}
               className="rdw-image-modal-upload-option-input"
             />
           </div>
@@ -336,12 +371,14 @@ class LayoutComponent extends Component {
       onExpandEvent,
       translations,
     } = this.props;
+
     return (
       <div
         className="rdw-image-wrapper"
         aria-haspopup="true"
         aria-expanded={expanded}
         aria-label="rdw-image-control"
+        style={{backgroundColor: 'red'}}
       >
         <Option
           className={classNames(className)}

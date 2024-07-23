@@ -9,7 +9,7 @@
   position: absolute;
   top: 35px;
   left: 5px;
-  display: flex;
+  display: none;
   flex-direction: column;
   width: 235px;
   border: 1px solid #F1F1F1;
