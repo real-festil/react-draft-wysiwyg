@@ -132,7 +132,6 @@ class LayoutComponent extends Component {
   };
 
   selectImage = event => {
-    window.alert('event.target.files[0]: ' + JSON.stringify(event.target.files[0]));
     if (event.target.files && event.target.files.length > 0) {
       this.uploadImage(event.target.files[0]);
     }
