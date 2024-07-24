@@ -5,14 +5,21 @@ import { Editor } from "../..";
 
 import "../styles.css";
 
-function uploadImageCallBack(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader(); // eslint-disable-line no-undef
-    reader.onload = (e) => resolve({ data: { link: e.target.result } });
-    reader.onerror = (e) => reject(e);
-    reader.readAsDataURL(file);
-  });
+const uploadImageCallBack = (file) => {
+      console.log('file', file);
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          resolve({ data: { link: e.target.result } });
+        };
+        reader.onerror = (error) => {
+          console.error('Error reading file', error);
+          reject(error);
+        };
+        reader.readAsDataURL(file);
+      });
 }
+
 
 const ImageDataURIComponent = () => (
   <div className="rdw-storybook-root">
