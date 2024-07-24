@@ -55,13 +55,6 @@ class LayoutComponent extends Component {
         uploadHighlighted: config.uploadEnabled && !!config.uploadCallback,
       });
     }
-
-    if (this.fileInputRef.current && !this.state.isClicked) {
-      this.fileInputRef.current.click();
-      this.setState({
-        isClicked: true
-      })
-    }
   }
 
   onDragEnter = event => {
@@ -366,7 +359,7 @@ class LayoutComponent extends Component {
 
   render() {
     const {
-      config: { icon, className, title },
+      config: { icon, className, title, inputAccept },
       expanded,
       onExpandEvent,
       translations,
@@ -380,14 +373,21 @@ class LayoutComponent extends Component {
         aria-label="rdw-image-control"
         style={{backgroundColor: 'red'}}
       >
-        <Option
-          className={classNames(className)}
-          value="unordered-list-item"
-          onClick={onExpandEvent}
-          title={title || translations['components.controls.image.image']}
-        >
-          <img src={icon} alt="" />
-        </Option>
+          <input
+            type="file"
+            id="file"
+            accept={inputAccept}
+            onChange={this.selectImage}
+            ref={this.fileInputRef}
+            className="rdw-image-modal-upload-option-input"
+          />
+          <Option
+            className={classNames(className)}
+            value="unordered-list-item"
+            title={title || translations['components.controls.image.image']}
+          >
+            <img src={icon} alt="" />
+          </Option>
         {expanded ? this.renderAddImageModal() : undefined}
       </div>
     );
