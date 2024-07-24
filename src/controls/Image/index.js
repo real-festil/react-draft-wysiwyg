@@ -111,7 +111,6 @@ class ImageControl extends Component {
     const { config } = this.props;
     const { uploadCallback } = config;
 
-
     if (uploadCallback) {
       uploadCallback(file)
         .then(({ data }) => {

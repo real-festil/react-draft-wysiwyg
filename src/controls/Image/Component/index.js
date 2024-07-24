@@ -132,22 +132,8 @@ class LayoutComponent extends Component {
   };
 
   selectImage = event => {
+    console.log('event', event)
     if (event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-
-      reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-          this.setState({
-            height: img.height,
-            width: img.width,
-          });
-        };
-        img.src = e.target.result;
-      };
-
-      reader.readAsDataURL(file);
       this.uploadImage(event.target.files[0]);
     }
   };
