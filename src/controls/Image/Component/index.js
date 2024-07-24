@@ -366,6 +366,7 @@ class LayoutComponent extends Component {
           />
           <Option
             className={classNames(className)}
+            onClick={() => {}}
             value="unordered-list-item"
             title={title || translations['components.controls.image.image']}
           >
