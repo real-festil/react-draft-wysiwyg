@@ -133,21 +133,6 @@ class LayoutComponent extends Component {
 
   selectImage = event => {
     if (event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-
-      reader.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-          this.setState({
-            height: img.height,
-            width: img.width,
-          });
-        };
-        img.src = e.target.result;
-      };
-
-      reader.readAsDataURL(file);
       this.uploadImage(event.target.files[0]);
     }
   };
@@ -155,23 +140,21 @@ class LayoutComponent extends Component {
   uploadImage = file => {
     this.toggleShowImageLoading();
     const { uploadCallback } = this.props.config;
-    uploadCallback(file)
-      .then(({ data }) => {
-        this.setState({
-          showImageLoading: false,
-          dragEnter: false,
-          imgSrc: data.link || data.url,
-        }, () => {
-          this.addImageFromState()
-        });
-        this.fileUpload = false;
-      })
-      .catch(() => {
-        this.setState({
-          showImageLoading: false,
-          dragEnter: false,
-        });
-      });
+    if (uploadCallback) {
+      uploadCallback(file)
+        .then(({ data }) => {
+          const { link, url } = data;
+          const objectURL = link || url;
+          const img = new Image();
+          img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            this.props.onChange(objectURL, width, height, '');
+            URL.revokeObjectURL(objectURL);
+          };
+          img.src = objectURL;
+        })
+    }
   };
 
   fileUploadClick = event => {
