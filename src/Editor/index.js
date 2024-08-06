@@ -64,6 +64,7 @@ class WysiwygEditor extends Component {
       editorState,
       editorFocused: false,
       toolbar,
+      dragEnter: false,
     };
   }
 
@@ -408,6 +409,7 @@ class WysiwygEditor extends Component {
     }
   };
 
+
   render() {
     const { editorState, editorFocused, toolbar } = this.state;
     const {
@@ -437,6 +439,9 @@ class WysiwygEditor extends Component {
     };
     const toolbarShow =
       editorFocused || this.focusHandler.isInputFocused() || !toolbarOnFocus;
+
+    console.log('this.state.editorState', this.state.dragEnter);
+
     return (
       <div
         id={this.wrapperId}
@@ -445,6 +450,20 @@ class WysiwygEditor extends Component {
         onClick={this.modalHandler.onEditorClick}
         onBlur={this.onWrapperBlur}
         aria-label="rdw-wrapper"
+        // onDragEnter={() => {
+        //   if (!this.state.dragEnter) {
+        //     this.setState({
+        //       dragEnter: true,
+        //     });
+        //   }
+        // }}
+        // onDragLeave={() => {
+        //   if (!!this.state.dragEnter) {
+        //     this.setState({
+        //       dragEnter: false,
+        //     });
+        //   }
+        // }}
       >
         {!toolbarHidden && (
           <div
@@ -464,7 +483,7 @@ class WysiwygEditor extends Component {
               if (opt === "image" && uploadCallback) {
                 config.uploadCallback = uploadCallback;
               }
-              return <Control key={index} {...controlProps} config={config} />;
+              return <Control key={index} {...controlProps} config={config} dragEnter={this.state.dragEnter} />;
             })}
             {toolbarCustomButtons &&
               toolbarCustomButtons.map((button, index) =>

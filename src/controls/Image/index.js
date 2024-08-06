@@ -19,7 +19,6 @@ class ImageControl extends Component {
     const { modalHandler } = this.props;
     this.state = {
       expanded: false,
-      dragEnter: false,
     };
     modalHandler.registerCallBack(this.expandCollapse);
   }
@@ -42,7 +41,6 @@ class ImageControl extends Component {
   doCollapse = () => {
     this.setState({
       expanded: false,
-      dragEnter: false,
     });
   };
 
@@ -72,20 +70,9 @@ class ImageControl extends Component {
     this.doCollapse();
   };
 
-  onDragEnter = event => {
-    event.preventDefault();
-    this.setState({ dragEnter: true });
-  };
-
-  onDragLeave = event => {
-    event.preventDefault();
-    this.setState({ dragEnter: false });
-  };
-
   onDrop = event => {
     event.preventDefault();
     const { config } = this.props;
-    this.setState({ dragEnter: false });
 
     let data;
     let dataIsItems;
@@ -129,23 +116,21 @@ class ImageControl extends Component {
   };
 
   render() {
-    const { config, translations } = this.props;
-    const { expanded, dragEnter } = this.state;
+    const { config, translations, dragEnter } = this.props;
+    const { expanded  } = this.state;
     const ImageComponent = config.component || LayoutComponent;
 
     return (
       <div className="image-control-wrapper">
-        <div
-          className={classNames('image-control-drop-area', { 'drag-enter': dragEnter })}
-          onDragEnter={this.onDragEnter}
-          onDragOver={e => e.preventDefault()}
-          onDrop={this.onDrop}
-          onDragLeave={this.onDragLeave}
-        >
-          {dragEnter && <p className="image-control-drop-area-text">
-            Drop files here
-          </p>}
-        </div>
+        {dragEnter && <div
+            className={classNames('image-control-drop-area', { 'drag-enter': dragEnter })}
+            // onDrop={this.onDrop}
+          >
+            <p className="image-control-drop-area-text">
+              Drop files here
+            </p>
+          </div>
+        }
         <ImageComponent
           config={config}
           translations={translations}

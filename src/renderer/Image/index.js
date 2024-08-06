@@ -113,8 +113,8 @@ const getImageComponent = config => class Image extends Component {
 
     const { src, alignment, alt } = entity.getData();
 
-    const currentWidth = width || entity.getData().width || '100%';
-    const currentHeight = height || entity.getData().height || '100%';
+    const currentWidth = width || entity.getData().height || '100%';
+    const currentHeight = height || entity.getData().width || '100%';
 
     return (
       <span
