@@ -149,7 +149,7 @@ class LayoutComponent extends Component {
           img.onload = () => {
             const width = img.width;
             const height = img.height;
-            this.props.onChange(objectURL, width, height, '');
+            this.props.onChange(objectURL, height, width, '');
             URL.revokeObjectURL(objectURL);
           };
           img.src = objectURL;
