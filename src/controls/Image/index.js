@@ -107,7 +107,7 @@ class ImageControl extends Component {
           img.onload = () => {
             const width = img.width;
             const height = img.height;
-            this.addImage(objectURL, height, width '');
+            this.addImage(objectURL, height, width, '');
             URL.revokeObjectURL(objectURL);
           };
           img.src = objectURL;
