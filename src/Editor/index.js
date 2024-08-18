@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import {
   Editor,
   EditorState,
+  AtomicBlockUtils,
   RichUtils,
   convertToRaw,
   convertFromRaw,
@@ -65,6 +66,7 @@ class WysiwygEditor extends Component {
       editorFocused: false,
       toolbar,
       dragEnter: false,
+      dragEnterCount: 0,
     };
   }
 
@@ -409,6 +411,154 @@ class WysiwygEditor extends Component {
     }
   };
 
+    handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState((prevState) => {
+      const newCount = prevState.dragEnterCount + 1;
+      return {
+        dragEnterCount: newCount,
+        dragEnter: newCount > 0,
+      };
+    });
+  };
+
+  handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState((prevState) => {
+      const newCount = prevState.dragEnterCount - 1;
+      return {
+        dragEnterCount: newCount,
+        dragEnter: newCount > 0,
+      };
+    });
+  };
+
+  handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const { editorState } = this.state;
+    const file = event.dataTransfer.files[0];
+
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const contentState = editorState.getCurrentContent();
+        const contentStateWithEntity = contentState.createEntity(
+          'IMAGE',
+          'IMMUTABLE',
+          { src: e.target.result }
+        );
+
+        const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+        let newEditorState = AtomicBlockUtils.insertAtomicBlock(
+          editorState,
+          entityKey,
+          ' '
+        );
+
+        // Обновляем состояние редактора напрямую через setState
+        // this.setState({
+        //   editorState: EditorState.forceSelection(
+        //     newEditorState,
+        //     newEditorState.getCurrentContent().getSelectionAfter()
+        //   ),
+        // });
+        this.onChange(newEditorState);
+      };
+
+      reader.readAsDataURL(file); // Читаем файл как DataURL
+    }
+  };
+
+  onDrop = event => {
+    event.preventDefault();
+    const { config } = this.props;
+
+    this.setState((prevState) => {
+      return {
+        dragEnterCount: 0,
+        dragEnter: false,
+      };
+    });
+
+    let data;
+    let dataIsItems;
+    if (event.dataTransfer.items) {
+      data = event.dataTransfer.items;
+      dataIsItems = true;
+    } else {
+      data = event.dataTransfer.files;
+      dataIsItems = false;
+    }
+    for (let i = 0; i < data.length; i += 1) {
+      if (
+        (!dataIsItems || data[i].kind === 'file') &&
+        data[i].type.match('^image/')
+      ) {
+        const file = dataIsItems ? data[i].getAsFile() : data[i];
+        this.uploadImage(file);
+      }
+    }
+  };
+
+  addImage = (src, height, width, alt = "image") => {
+    const { editorState } = this.state;
+    const entityData = { src, height, width };
+
+    const entityKey = editorState
+      .getCurrentContent()
+      .createEntity('IMAGE', 'MUTABLE', entityData)
+      .getLastCreatedEntityKey();
+    const newEditorState = AtomicBlockUtils.insertAtomicBlock(
+      editorState,
+      entityKey,
+      ' '
+    );
+    this.onChange(newEditorState);
+    this.doCollapse();
+  };
+
+  uploadImage = file => {
+    const { config, toolbar: {image: { uploadCallback }} } = this.props;
+
+
+    if (uploadCallback) {
+      uploadCallback(file)
+        .then(({ data }) => {
+          const { link, url } = data;
+          const objectURL = link || url;
+          const img = new Image();
+          img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            this.addImage(objectURL, height, width, '');
+            URL.revokeObjectURL(objectURL);
+          };
+          img.src = objectURL;
+        })
+    }
+  };
+
+  onPaste = (event) => {
+    const { editorState } = this.state;
+
+    const clipboardData = event.clipboardData || window.clipboardData;
+    const items = clipboardData.items;
+
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        this.uploadImage(file);
+        event.preventDefault();
+        break;
+      }
+    }
+  };
 
   render() {
     const { editorState, editorFocused, toolbar } = this.state;
@@ -440,8 +590,6 @@ class WysiwygEditor extends Component {
     const toolbarShow =
       editorFocused || this.focusHandler.isInputFocused() || !toolbarOnFocus;
 
-    console.log('this.state.editorState', this.state.dragEnter);
-
     return (
       <div
         id={this.wrapperId}
@@ -450,20 +598,11 @@ class WysiwygEditor extends Component {
         onClick={this.modalHandler.onEditorClick}
         onBlur={this.onWrapperBlur}
         aria-label="rdw-wrapper"
-        // onDragEnter={() => {
-        //   if (!this.state.dragEnter) {
-        //     this.setState({
-        //       dragEnter: true,
-        //     });
-        //   }
-        // }}
-        // onDragLeave={() => {
-        //   if (!!this.state.dragEnter) {
-        //     this.setState({
-        //       dragEnter: false,
-        //     });
-        //   }
-        // }}
+        onDragEnter={this.handleDragEnter}
+        onDragLeave={this.handleDragLeave}
+        onDrop={this.onDrop}
+        onDragOver={(e) => e.preventDefault()}
+        onPaste={this.onPaste}
       >
         {!toolbarHidden && (
           <div
