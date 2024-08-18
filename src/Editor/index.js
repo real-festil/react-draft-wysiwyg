@@ -561,7 +561,7 @@ class WysiwygEditor extends Component {
   };
 
   render() {
-    const { editorState, editorFocused, toolbar } = this.state;
+    const { editorState, editorFocused, toolbar, dragEnter } = this.state;
     const {
       locale,
       localization: { locale: newLocale, translations },
@@ -640,6 +640,14 @@ class WysiwygEditor extends Component {
           onKeyDown={KeyDownHandler.onKeyDown}
           onMouseDown={this.onEditorMouseDown}
         >
+          {dragEnter && <div
+            className={classNames('image-control-drop-area', { 'drag-enter': dragEnter })}
+            >
+              <p className="image-control-drop-area-text">
+                Drop files here
+              </p>
+            </div>
+          }
           <Editor
             ref={this.setEditorReference}
             keyBindingFn={this.keyBindingFn}

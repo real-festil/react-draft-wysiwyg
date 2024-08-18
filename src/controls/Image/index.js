@@ -122,15 +122,6 @@ class ImageControl extends Component {
 
     return (
       <div className="image-control-wrapper">
-        {dragEnter && <div
-            className={classNames('image-control-drop-area', { 'drag-enter': dragEnter })}
-            // onDrop={this.onDrop}
-          >
-            <p className="image-control-drop-area-text">
-              Drop files here
-            </p>
-          </div>
-        }
         <ImageComponent
           config={config}
           translations={translations}

@@ -6,7 +6,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: calc(100% - 49px);
+  height: calc(100% - 24px);
   border: 1px dashed transparent;
   z-index: 1;
 }
@@ -25,7 +25,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, calc(-50% - 24.5px));
+  transform: translate(-50%, calc(-50% - 12px));
   color: rgba(0, 0, 0, 0.30);
   font-size: 32px;
   font-style: normal;
